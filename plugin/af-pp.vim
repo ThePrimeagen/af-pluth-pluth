@@ -5,7 +5,7 @@ fun! AfPPOnEnter()
     if g:afpp_skip
         let g:afpp_skip = 0
         return
-    endif
+endif
 
     let id = nvim_get_current_buf()
 
@@ -27,8 +27,6 @@ fun! AfPPOnEnter()
     if len(g:afpp_last_three) > 3
         let g:afpp_last_three = g:afpp_last_three[0:2]
     endif
-
-    echom g:afpp_last_three
 endfun
 
 fun! AfPPAlternate()
