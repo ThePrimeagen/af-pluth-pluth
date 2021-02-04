@@ -1,6 +1,11 @@
 let last_three = []
 fun! ManageAFileOnEnter() 
     let id = nvim_get_current_buf()
+
+    if bufname(id) == ""
+        return
+    endif
+
     let idx = index(g:last_three, l:id)
 
     if l:idx == -1 
@@ -20,7 +25,7 @@ fun! ManageAFileOnEnter()
     endif
 endfun
 
-fun! ManageAFileAlteratePluthPluth()
+fun! ManageAFileAlternatePluthPluth()
     if len(g:last_three) != 3
         return
     endif
