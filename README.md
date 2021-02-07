@@ -1,4 +1,5 @@
 ## Alternate File pluth pluth
+![Alternate File Pluth Pluth](images/pluthpluth.png)
 I have been bothered by my navigation lately.  I want to love marks, but I
 don't, probably my fault.  I don't like fuzzy finders to use consistently.  I
 feel like its an anti-pattern.  `:e` is worse.  Alternate file is amazing, but
