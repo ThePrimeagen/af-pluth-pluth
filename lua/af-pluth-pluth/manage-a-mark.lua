@@ -142,8 +142,8 @@ M.nav_file = function(id)
     end
 
     local buf_id = vim.fn.bufnr(marked_files[idx])
-    if buf_id ~= nil then
-        vim.api.nvim_set_current_buf()
+    if buf_id ~= nil and buf_id ~= -1 then
+        vim.api.nvim_set_current_buf(buf_id)
     else 
         vim.cmd(string.format("e %s", marked_files[idx]))
     end
