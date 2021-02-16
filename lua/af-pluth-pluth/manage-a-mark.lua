@@ -15,7 +15,7 @@ cwd = cwd:gsub("/", "_")
 
 local file_name = string.format("%s/%s.cache", data_path, cwd)
 
-function hydrate_from_cache() 
+function hydrate_from_cache()
     --[[
     if not vim.g.manage_a_mark_cache_files then
         return {}
@@ -37,16 +37,16 @@ function hydrate_from_cache()
     return {}
 end
 
-M.save = function() 
+M.save = function()
     Path:new(file_name):write(vim.fn.json_encode(marked_files), 'w')
 end
 
 marked_files = marked_files or hydrate_from_cache() or {}
 
-function create_window() 
+function create_window()
     local win_info = float.percentage_range_window(
-        factorw, 
-        factorh, 
+        factorw,
+        factorh,
         {
             winblend = 0
         })
@@ -54,7 +54,7 @@ function create_window()
     return win_info
 end
 
-function get_index_of(item) 
+function get_index_of(item)
     if type(item) == 'string' then
         for idx = 1, #marked_files do
             if marked_files[idx] == item then
@@ -76,7 +76,17 @@ function get_index_of(item)
     return nil
 end
 
-M.open_quick_menu = function() 
+function valid_index(idx) 
+    return idx ~= nil and marked_files ~= nil
+end
+
+function swap(a_idx, b_idx) 
+    local tmp = marked_files[a_idx]
+    marked_files[a_idx] = marked_files[b_idx]
+    marked_files[b_idx] = tmp
+end
+
+M.open_quick_menu = function()
     if win_id == nil then
         local win_info = create_window()
         win_id = win_info.win_id
@@ -91,9 +101,9 @@ M.open_quick_menu = function()
     vim.api.nvim_buf_set_lines(bufh, 0, #contents, false, contents)
 end
 
-M.add_file = function() 
+M.add_file = function()
     local buf_name = vim.fn.bufname(vim.fn.bufnr())
-    if get_index_of(buf_name) ~= nil then
+    if valid_index(get_index_of(buf_name)) then
         -- we don't alter file layout.
         return
     end
@@ -108,45 +118,66 @@ M.add_file = function()
     table.insert(marked_files, buf_name)
 end
 
-M.swap = function(a, b) 
+M.swap = function(a, b)
     a_idx = get_index_of(a)
     b_idx = get_index_of(b)
 
-    if a_idx == nil or b_idx == nil then
+    if not valid_index(a_idx) or not valid_index(b_idx) then
         return
     end
 
-    local tmp = marked_files[a_idx]
-    marked_files[a_idx] = marked_files[b_idx]
-    marked_files[b_idx] = tmp
+    swap(a_idx, b_idx)
 end
 
-M.rm_file = function(file) 
+M.rm_file = function(file)
     idx = get_index_of(file)
-    if idx == nil then
+    if not valid_index(idx) then
         return
     end
 
     marked_files[idx] = nil
 end
 
-M.nav_file = function(id) 
-
-    if vim.api.nvim_win_is_valid(id) then
-        vim.api.nvim_win_close(win_id)
-    end
+M.nav_file = function(id)
 
     idx = get_index_of(id)
-    if idx == nil then
+    if not valid_index(idx) then
         return
     end
 
     local buf_id = vim.fn.bufnr(marked_files[idx])
+
+    if vim.api.nvim_win_is_valid(buf_id) then
+        vim.api.nvim_win_close(win_id)
+    end
+
     if buf_id ~= nil and buf_id ~= -1 then
         vim.api.nvim_set_current_buf(buf_id)
-    else 
+    else
         vim.cmd(string.format("e %s", marked_files[idx]))
     end
+end
+
+M.clear_all = function()
+    marked_files = {}
+end
+
+M.promote = function(id)
+    idx = get_index_of(id)
+    if not valid_index(idx) or idx == 1 then
+        return
+    end
+
+    swap(idx - 1, idx)
+end
+
+M.promote_to_front = function(id)
+    idx = get_index_of(id)
+    if not valid_index(idx) or idx == 1 then
+        return
+    end
+
+    swap(1, idx)
 end
 
 return M
